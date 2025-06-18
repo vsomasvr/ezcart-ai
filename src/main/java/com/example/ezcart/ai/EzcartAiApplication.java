@@ -16,13 +16,13 @@ import java.util.Scanner;
 
 import static com.example.ezcart.ai.agent.MultiToolAgent.*;
 
-//@SpringBootApplication
+@SpringBootApplication
 public class EzcartAiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(EzcartAiApplication.class, args);
 	}
-	@Bean
+//	@Bean
 	CommandLineRunner cli() {
 		String mcpServerUrl = System.getenv("MCP_TOOLBOX_URL");
 		System.out.println(mcpServerUrl);

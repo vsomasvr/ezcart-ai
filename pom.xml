@@ -12,7 +12,7 @@
 	<artifactId>ezcart-ai</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ezcart-ai</name>
-	<description>EZCart MCP server</description>
+	<description>EZCart AI App</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -60,6 +60,14 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
