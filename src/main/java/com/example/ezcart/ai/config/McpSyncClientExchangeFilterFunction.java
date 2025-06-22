@@ -1,4 +1,4 @@
-package com.example.ezcart.ai;
+package com.example.ezcart.ai.config;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
