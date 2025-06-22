@@ -5,13 +5,23 @@ import com.google.adk.runner.InMemoryRunner;
 import com.google.adk.sessions.Session;
 import com.google.genai.types.Content;
 import com.google.genai.types.Part;
+import io.modelcontextprotocol.client.McpSyncClient;
 import io.reactivex.rxjava3.core.Flowable;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Scanner;
 
 import static com.example.ezcart.ai.agent.MultiToolAgent.*;
@@ -22,6 +32,30 @@ public class EzcartAiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(EzcartAiApplication.class, args);
 	}
+
+	@Bean
+	ChatClient chatClient(ChatClient.Builder chatClientBuilder, List<McpSyncClient> mcpClients) {
+		return chatClientBuilder.defaultToolCallbacks(new SyncMcpToolCallbackProvider(mcpClients)).build();
+	}
+
+	/**
+	 * Overload Boot's default {@link WebClient.Builder}, so that we can inject an
+	 * oauth2-enabled {@link ExchangeFilterFunction} that adds OAuth2 tokens to requests
+	 * sent to the MCP server.
+	 */
+	@Bean
+	WebClient.Builder webClientBuilder(McpSyncClientExchangeFilterFunction filterFunction) {
+		return WebClient.builder().apply(filterFunction.configuration());
+	}
+
+//	@Bean
+//	SecurityFilterChain securityFilterChainClient(HttpSecurity http) throws Exception {
+//		return http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+//				.oauth2Client(Customizer.withDefaults())
+//				.csrf(CsrfConfigurer::disable)
+//				.build();
+//	}
+
 //	@Bean
 	CommandLineRunner cli() {
 		String mcpServerUrl = System.getenv("MCP_TOOLBOX_URL");

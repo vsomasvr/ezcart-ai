@@ -1,5 +1,10 @@
 package com.example.ezcart.ai.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,8 +18,33 @@ import java.util.Map;
 @RequestMapping("/api/ai")
 public class AiController {
 
+    private Logger logger = LoggerFactory.getLogger(AiController.class);
+
+    private final VertexAiGeminiChatModel chatModel;
+    private ChatClient chatClient;
+
+    @Autowired
+    public AiController(VertexAiGeminiChatModel chatModel, ChatClient chatClient) {
+        this.chatModel = chatModel;
+        this.chatClient = chatClient;
+
+//        String response = ChatClient.create(chatModel)
+//                .prompt("What day is tomorrow?")
+//                .tools(new DateTimeTools())
+//                .call()
+//                .content();
+//
+//        System.out.println(response);
+    }
+
     @PostMapping("/execute")
     public Map<String, String> execute(@RequestBody String message, Authentication authentication) {
-        return Collections.singletonMap("text", "Thanks for your message! I'm a placeholder AI and I'm processing your request.");
+        logger.info("AI endpoint called on behalf of user: " + authentication.getName());
+        logger.info("Received message: " + message);
+        String response = chatClient
+                .prompt(message)
+                .call()
+                .content();
+        return Collections.singletonMap("text", response);
     }
 }
