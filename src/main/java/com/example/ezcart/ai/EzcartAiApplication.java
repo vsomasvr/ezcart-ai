@@ -30,10 +30,6 @@ public class EzcartAiApplication {
 		SpringApplication.run(EzcartAiApplication.class, args);
 	}
 
-	@Bean
-	ChatClient chatClient(ChatClient.Builder chatClientBuilder, List<McpSyncClient> mcpClients) {
-		return chatClientBuilder.defaultToolCallbacks(new SyncMcpToolCallbackProvider(mcpClients)).build();
-	}
 
 	/**
 	 * Overload Boot's default {@link WebClient.Builder}, so that we can inject an
