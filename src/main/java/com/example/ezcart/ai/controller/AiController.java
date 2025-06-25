@@ -23,14 +23,21 @@ public class AiController {
     private Logger logger = LoggerFactory.getLogger(AiController.class);
 
 //    private final VertexAiGeminiChatModel chatModel;
-    private final ChatClient productSearchClient;
+    private final Agent productSearchAgent;
+    private final Agent productSummarizationAgent;
+    private final Agent defaultAgent;
+    private final ChatClient agentOrchestratorClient;
     private final RoutingWorkflow  routerWorkflow;
-    private Map<String, ChatClient> supportRoutes;
+    private Map<String, Agent> supportRoutes;
 
     @Autowired
-    public AiController(@Qualifier("productSearchClient")ChatClient productSearchClient) {
-        this.productSearchClient = productSearchClient;
-        this.routerWorkflow = new RoutingWorkflow(productSearchClient);
+    public AiController(Agent productSearchAgent, Agent productSummarizationAgent, Agent defaultAgent,
+                        @Qualifier("agentOrchestratorClient")ChatClient agentOrchestratorClient) {
+        this.productSearchAgent = productSearchAgent;
+        this.productSummarizationAgent = productSummarizationAgent;
+        this.defaultAgent = defaultAgent;
+        this.agentOrchestratorClient = agentOrchestratorClient;
+        this.routerWorkflow = new RoutingWorkflow(agentOrchestratorClient);
     }
 
     @PostMapping("/execute")
@@ -45,26 +52,20 @@ public class AiController {
             throw new IllegalArgumentException("Selected route '" + route + "' not found in routes map");
         }
 
-        String response = supportRoutes.get(route)
-                .prompt()
-                .user(message)
-                .advisors(a ->
-                        a.param(ChatMemory.CONVERSATION_ID, authentication.getName())
-                )
-                .call()
-                .content();
+        Map<String, String> response = supportRoutes.get(route).execute(message, authentication.getName());
 
-        return Collections.singletonMap("text", response);
+        return response;
     }
 
     @PostConstruct
     private void init() {
-        supportRoutes = Map.of("product-search", productSearchClient,
-                "product-summarization", productSearchClient,
-                "product-recommendation-with-spec-and-reviews", productSearchClient,
-                "product-summarization-with-reviews", productSearchClient,
-                "product-comparison", productSearchClient,
-                "add-to-cart", productSearchClient,
-                "remove-from-cart", productSearchClient);
+        supportRoutes = Map.of("product-search", productSearchAgent,
+                "product-summarization", productSummarizationAgent,
+                "product-recommendation-with-spec-and-reviews", productSummarizationAgent,
+                "product-summarization-with-reviews", productSummarizationAgent,
+                "product-comparison", productSummarizationAgent,
+                "add-to-cart", productSummarizationAgent,
+                "remove-from-cart", productSummarizationAgent,
+        "default", defaultAgent);
     }
 }
